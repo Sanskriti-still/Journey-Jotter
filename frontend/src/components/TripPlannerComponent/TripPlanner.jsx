@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { generateTrip } from "../../services/gemini";
+import { generateTrip } from "../../Services/gemini";
 
 function TripPlanner() {
   const resultRef = useRef(null);
