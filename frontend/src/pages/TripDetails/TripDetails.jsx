@@ -1,25 +1,43 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
+
 import TripMap from "../../components/Map/TripMap";
+import ItineraryCards from "../../components/ItineraryCards/ItineraryCards";
 
 function TripDetails() {
-
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  if (!state) {
-    return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-blue-50">
-        <h1 className="text-4xl font-bold text-red-600">
-          Trip Not Found
-        </h1>
+  /* =====================================================
+     TRIP NOT FOUND
+  ===================================================== */
 
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="mt-8 bg-blue-600 text-white px-6 py-3 rounded-xl"
-        >
-          Back to Dashboard
-        </button>
+  if (!state || !state.trip) {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+
+        <div className="rounded-3xl bg-white p-10 shadow-xl">
+
+          <div className="text-6xl">
+            😕
+          </div>
+
+          <h1 className="mt-5 text-3xl font-black text-slate-900">
+            Trip Not Found
+          </h1>
+
+          <p className="mt-2 text-slate-500">
+            We couldn't find the selected trip.
+          </p>
+
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="mt-8 rounded-xl bg-blue-600 px-6 py-3 font-bold text-white transition hover:bg-blue-700"
+          >
+            Back to Dashboard
+          </button>
+
+        </div>
+
       </div>
     );
   }
@@ -27,128 +45,242 @@ function TripDetails() {
   const { trip } = state;
 
   return (
-    <section className="min-h-screen bg-gray-100 py-10">
+    <section className="min-h-screen bg-slate-50 py-10">
 
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+
+        {/* BACK BUTTON */}
 
         <button
           onClick={() => navigate(-1)}
-          className="mb-8 bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700"
+          className="mb-8 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700"
         >
-          ← Back
+          ← Back to My Trips
         </button>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+        {/* =================================================
+            MAIN TRIP CARD
+        ================================================= */}
 
-          {trip.image && (
+        <div className="overflow-hidden rounded-[32px] bg-white shadow-xl">
+
+          {/* DESTINATION IMAGE */}
+
+          {trip.image ? (
             <img
               src={trip.image}
               alt={trip.destination}
-              className="w-full h-96 object-cover"
+              className="h-64 w-full object-cover md:h-96"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
             />
+          ) : (
+            <div className="flex h-64 w-full items-center justify-center bg-gradient-to-r from-blue-600 to-cyan-500 text-6xl md:h-96">
+              ✈️ 🌍
+            </div>
           )}
 
-          <div className="p-8">
+          <div className="p-6 md:p-10">
 
-            <h1 className="text-5xl font-bold text-blue-700">
-              📍 {trip.destination}
-            </h1>
+            {/* DESTINATION */}
 
-            <div className="grid md:grid-cols-4 gap-6 mt-8">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wider text-blue-600">
+                Your Journey
+              </p>
 
-              <div className="bg-blue-50 rounded-2xl p-6">
-                <h3 className="font-bold">Days</h3>
-                <p>{trip.days}</p>
+              <h1 className="mt-2 text-4xl font-black text-slate-900 md:text-5xl">
+                📍 {trip.destination}
+              </h1>
+
+              <p className="mt-2 text-slate-500">
+                Your personalized Journey Jotter travel plan.
+              </p>
+            </div>
+
+            {/* =================================================
+                TRIP SUMMARY
+            ================================================= */}
+
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+              {/* DAYS */}
+
+              <div className="rounded-3xl border border-blue-100 bg-blue-50 p-6">
+                <div className="text-2xl">
+                  📅
+                </div>
+
+                <p className="mt-3 text-sm font-semibold text-blue-600">
+                  Duration
+                </p>
+
+                <p className="mt-1 text-2xl font-black text-slate-900">
+                  {trip.days}{" "}
+                  {Number(trip.days) === 1
+                    ? "Day"
+                    : "Days"}
+                </p>
               </div>
 
-              <div className="bg-green-50 rounded-2xl p-6">
-                <h3 className="font-bold">Budget</h3>
-                <p>₹{trip.budget}</p>
+              {/* BUDGET */}
+
+              <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-6">
+                <div className="text-2xl">
+                  💰
+                </div>
+
+                <p className="mt-3 text-sm font-semibold text-emerald-600">
+                  Budget
+                </p>
+
+                <p className="mt-1 text-2xl font-black text-slate-900">
+                  ₹{trip.budget}
+                </p>
               </div>
 
-              <div className="bg-yellow-50 rounded-2xl p-6">
-                <h3 className="font-bold">Style</h3>
-                <p>{trip.style}</p>
+              {/* STYLE */}
+
+              <div className="rounded-3xl border border-amber-100 bg-amber-50 p-6">
+                <div className="text-2xl">
+                  🎒
+                </div>
+
+                <p className="mt-3 text-sm font-semibold text-amber-600">
+                  Travel Style
+                </p>
+
+                <p className="mt-1 text-2xl font-black text-slate-900">
+                  {trip.style}
+                </p>
               </div>
 
-              <div className="bg-purple-50 rounded-2xl p-6">
-                <h3 className="font-bold">Travel Type</h3>
-                <p>{trip.travelType}</p>
+              {/* TRAVEL TYPE */}
+
+              <div className="rounded-3xl border border-violet-100 bg-violet-50 p-6">
+                <div className="text-2xl">
+                  👥
+                </div>
+
+                <p className="mt-3 text-sm font-semibold text-violet-600">
+                  Travel Type
+                </p>
+
+                <p className="mt-1 text-2xl font-black text-slate-900">
+                  {trip.travelType}
+                </p>
               </div>
 
             </div>
 
+            {/* =================================================
+                WEATHER
+            ================================================= */}
+
             {trip.weather && (
+              <div className="mt-12">
 
-              <div className="mt-10">
+                <div className="mb-5">
+                  <p className="text-sm font-bold uppercase tracking-wider text-cyan-600">
+                    Destination Preview
+                  </p>
 
-                <h2 className="text-3xl font-bold text-blue-700 mb-6">
-                  🌤 Weather
-                </h2>
+                  <h2 className="mt-1 text-3xl font-black text-slate-900">
+                    🌤 Weather
+                  </h2>
+                </div>
 
-                <div className="grid md:grid-cols-4 gap-5">
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
-                  <div className="bg-white shadow rounded-xl p-5">
-                    <h3>Temperature</h3>
-                    <p>{trip.weather.temperature}°C</p>
+                  <div className="rounded-3xl bg-white p-6 shadow-md">
+                    <p className="text-sm text-slate-500">
+                      Temperature
+                    </p>
+
+                    <p className="mt-2 text-2xl font-black text-slate-900">
+                      {trip.weather.temperature}°C
+                    </p>
                   </div>
 
-                  <div className="bg-white shadow rounded-xl p-5">
-                    <h3>Condition</h3>
-                    <p>{trip.weather.description}</p>
+                  <div className="rounded-3xl bg-white p-6 shadow-md">
+                    <p className="text-sm text-slate-500">
+                      Condition
+                    </p>
+
+                    <p className="mt-2 text-xl font-black capitalize text-slate-900">
+                      {trip.weather.description}
+                    </p>
                   </div>
 
-                  <div className="bg-white shadow rounded-xl p-5">
-                    <h3>Humidity</h3>
-                    <p>{trip.weather.humidity}%</p>
+                  <div className="rounded-3xl bg-white p-6 shadow-md">
+                    <p className="text-sm text-slate-500">
+                      Humidity
+                    </p>
+
+                    <p className="mt-2 text-2xl font-black text-slate-900">
+                      {trip.weather.humidity}%
+                    </p>
                   </div>
 
-                  <div className="bg-white shadow rounded-xl p-5">
-                    <h3>Wind</h3>
-                    <p>{trip.weather.wind} m/s</p>
+                  <div className="rounded-3xl bg-white p-6 shadow-md">
+                    <p className="text-sm text-slate-500">
+                      Wind
+                    </p>
+
+                    <p className="mt-2 text-2xl font-black text-slate-900">
+                      {trip.weather.wind} m/s
+                    </p>
                   </div>
 
                 </div>
 
               </div>
-
             )}
 
-            {trip.weather && trip.weather.lat && (
+            {/* =================================================
+                MAP
+            ================================================= */}
 
-              <div className="mt-10">
+            {trip.weather?.lat && trip.weather?.lon && (
+              <div className="mt-12">
 
-                <h2 className="text-3xl font-bold mb-6">
-                  🗺 Destination Map
-                </h2>
+                <div className="mb-5">
+                  <p className="text-sm font-bold uppercase tracking-wider text-blue-600">
+                    Explore the destination
+                  </p>
 
-                <TripMap
-                  lat={trip.weather.lat}
-                  lon={trip.weather.lon}
-                  destination={trip.destination}
-                />
+                  <h2 className="mt-1 text-3xl font-black text-slate-900">
+                    🗺️ Destination Map
+                  </h2>
+                </div>
+
+                <div className="overflow-hidden rounded-3xl bg-white shadow-lg">
+
+                  <TripMap
+                    lat={trip.weather.lat}
+                    lon={trip.weather.lon}
+                    destination={trip.destination}
+                  />
+
+                </div>
 
               </div>
-
             )}
-
-            <div className="mt-10">
-
-              <h2 className="text-3xl font-bold text-blue-700 mb-6">
-                ✈ AI Itinerary
-              </h2>
-
-              <div className="bg-gray-50 rounded-2xl p-8 prose max-w-none">
-
-                <ReactMarkdown>
-                  {trip.itinerary}
-                </ReactMarkdown>
-
-              </div>
-
-            </div>
 
           </div>
+
+        </div>
+
+        {/* =================================================
+            NEW AI ITINERARY
+        ================================================= */}
+
+        <div className="mt-12">
+
+          <ItineraryCards
+            trip={trip.itinerary}
+          />
 
         </div>
 
@@ -156,7 +288,7 @@ function TripDetails() {
 
     </section>
   );
-
 }
 
 export default TripDetails;
+

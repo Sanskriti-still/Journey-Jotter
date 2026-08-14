@@ -1,30 +1,50 @@
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
-export async function downloadTripPDF(element, destination) {
-  if (!element) return;
+export function downloadTripPDF(trip) {
+  const pdf = new jsPDF();
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-  });
+  let y = 20;
 
-  const imgData = canvas.toDataURL("image/png");
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(22);
+  pdf.text("Journey Jotter", 20, y);
 
-  const pdf = new jsPDF("p", "mm", "a4");
+  y += 15;
 
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight =
-    (canvas.height * pdfWidth) / canvas.width;
+  pdf.setFontSize(12);
+  pdf.setFont("helvetica", "normal");
 
-  pdf.addImage(
-    imgData,
-    "PNG",
-    0,
-    0,
-    pdfWidth,
-    pdfHeight
+  pdf.text(`Destination: ${trip.destination}`, 20, y);
+  y += 10;
+
+  pdf.text(`Duration: ${trip.days} Days`, 20, y);
+  y += 10;
+
+  pdf.text(`Budget: ₹${trip.budget}`, 20, y);
+  y += 10;
+
+  pdf.text(`Travel Style: ${trip.style}`, 20, y);
+  y += 10;
+
+  pdf.text(`Travel Type: ${trip.travelType}`, 20, y);
+
+  y += 20;
+
+  pdf.setFont("helvetica", "bold");
+  pdf.setFontSize(18);
+  pdf.text("AI Itinerary", 20, y);
+
+  y += 10;
+
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(11);
+
+  const lines = pdf.splitTextToSize(
+    trip.itinerary,
+    170
   );
 
-  pdf.save(`${destination}-Journey-Jotter.pdf`);
+  pdf.text(lines, 20, y);
+
+  pdf.save(`${trip.destination}-Journey-Jotter.pdf`);
 }

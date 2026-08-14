@@ -1,99 +1,97 @@
-import { Link, useNavigate } from "react-router-dom";
-import { auth } from "../../firebase/firebase";
-import { signOut, onAuthStateChanged } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 
 function Navbar() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
-    try {
-      await signOut(auth);
-
-      toast.success("Logged out successfully!");
-
-      navigate("/");
-    } catch (error) {
-      toast.error(error.message);
-    }
+    await logout();
+    toast.success("Logged out successfully!");
   };
 
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <nav className="flex items-center justify-between bg-white px-8 py-5 shadow-md">
+      {/* LOGO */}
+      <Link
+        to="/"
+        className="text-3xl font-bold text-blue-600"
+      >
+        🌍 Journey Jotter
+      </Link>
 
+      {/* NAVIGATION */}
+      <div className="flex items-center gap-6">
+
+        {/* HOME */}
         <Link
           to="/"
-          className="text-3xl font-bold text-blue-600"
+          className="hover:text-blue-600"
         >
-          🌍 Journey Jotter
+          Home
         </Link>
 
-        <ul className="flex gap-8 items-center font-semibold">
+        {/* PLANNER */}
+        <Link
+          to="/planner"
+          className="hover:text-blue-600"
+        >
+          Planner
+        </Link>
 
-          <li>
-            <Link to="/">Home</Link>
-          </li>
+        {user ? (
+          <>
+            {/* DASHBOARD */}
+            <Link
+              to="/dashboard"
+              className="hover:text-blue-600"
+            >
+              Dashboard
+            </Link>
 
-          {user && (
-            <>
-              <li>
-                <Link to="/planner">Planner</Link>
-              </li>
+            {/* MY TRIPS */}
+            <Link
+              to="/my-trips"
+              className="hover:text-blue-600"
+            >
+              My Trips
+            </Link>
 
-              <li>
-                <Link to="/dashboard">Dashboard</Link>
-              </li>
+            {/* PROFILE */}
+            <Link
+              to="/profile"
+              className="hover:text-blue-600"
+            >
+              Profile
+            </Link>
 
-              <li>
-                <Link to="/profile">Profile</Link>
-              </li>
-            </>
-          )}
+            {/* LOGOUT */}
+            <button
+              onClick={handleLogout}
+              className="rounded-xl bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            {/* LOGIN */}
+            <Link
+              to="/login"
+              className="hover:text-blue-600"
+            >
+              Login
+            </Link>
 
-          {!user ? (
-            <>
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
-
-              <li>
-                <Link
-                  to="/signup"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Sign Up
-                </Link>
-              </li>
-            </>
-          ) : (
-            <>
-              <li className="text-blue-600 font-medium">
-                {user.email}
-              </li>
-
-              <li>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                >
-                  Logout
-                </button>
-              </li>
-            </>
-          )}
-
-        </ul>
+            {/* SIGN UP */}
+            <Link
+              to="/signup"
+              className="rounded-xl bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
+            >
+              Sign Up
+            </Link>
+          </>
+        )}
 
       </div>
     </nav>

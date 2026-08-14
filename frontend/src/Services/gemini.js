@@ -1,24 +1,40 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:5000/generate-trip";
 
-export async function generateTrip(data) {
+export const generateTrip = async ({
+  destination,
+  days,
+  budget,
+  style,
+  travelType,
+}) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/generate-trip`,
-      data
-    );
+    const response = await axios.post(API_URL, {
+      destination,
+      days,
+      budget,
+      style,
+      travelType,
+    });
 
-    return response.data.trip;
-  } catch (error) {
-    console.error("Frontend Error:", error);
-
-    if (error.response) {
+    if (!response.data?.success) {
       throw new Error(
-        error.response.data.error || "Failed to generate AI trip."
+        response.data?.message || "Trip generation failed"
       );
     }
 
-    throw new Error("Backend server is not running.");
+    return response.data.trip;
+  } catch (error) {
+    console.error(
+      "generateTrip ERROR:",
+      error.response?.data || error.message
+    );
+
+    throw new Error(
+      error.response?.data?.message ||
+        error.message ||
+        "Request failed"
+    );
   }
-}
+};

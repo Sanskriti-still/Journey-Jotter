@@ -5,254 +5,211 @@ import axios from "axios";
 
 dotenv.config();
 
-
-console.log(
-  "Loaded OpenRouter API Key:",
-  process.env.OPENROUTER_API_KEY ? "YES" : "NO"
-);
-
-console.log("Current Directory:", process.cwd());
-
-
 const app = express();
 
-
-app.use(cors({
-  origin: "*"
-}));
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.use(express.json());
 
-
 const PORT = process.env.PORT || 5000;
 
-
+// =====================================================
+// HOME
+// =====================================================
 
 app.get("/", (req, res) => {
-
   res.send("🚀 Journey Jotter Backend Running");
-
 });
 
-
-
+// =====================================================
+// GENERATE TRIP
+// =====================================================
 
 app.post("/generate-trip", async (req, res) => {
-
-
   try {
-
+    console.log("REQUEST BODY:", req.body);
 
     const {
       destination,
       days,
       budget,
       style,
-      travelType
-    } = req.body;
+      travelType,
+    } = req.body || {};
 
-
+    if (!destination) {
+      return res.status(400).json({
+        success: false,
+        message: "Destination is required",
+      });
+    }
 
     const prompt = `
+You are Journey Jotter AI, an intelligent travel planning assistant.
 
-You are an expert AI Travel Planner.
+Create a detailed and practical travel itinerary.
 
-Generate a detailed and realistic ${days}-day travel itinerary.
+DESTINATION:
+${destination}
 
-Trip Details:
+NUMBER OF DAYS:
+${days}
 
-- Destination: ${destination}
-- Duration: ${days} days
-- Budget: ₹${budget}
-- Travel Style: ${style}
-- Travel Type: ${travelType}
+BUDGET:
+${budget || "Flexible"}
 
+TRAVEL STYLE:
+${style || "General"}
 
-Return the itinerary in Markdown format.
+TRAVEL TYPE:
+${travelType || "Solo"}
 
+Create a personalized itinerary.
 
-# 🌍 Destination Overview
+Include:
 
-Write 3-4 lines introducing the destination.
+🌍 DESTINATION OVERVIEW
 
+📅 DAY-WISE ITINERARY
 
-For each day:
+For every day include:
+- Morning activities
+- Afternoon activities
+- Evening activities
+- Night activities
+- Approximate travel time
+- Approximate activity cost
 
+🍽️ FOOD RECOMMENDATIONS
 
-## 📅 Day 1
+Include:
+- Local dishes
+- Popular food experiences
+- Restaurants or food areas
 
-🌅 Morning
+🚕 TRANSPORTATION
 
-☀️ Afternoon
+Explain:
+- Best local transport
+- Approximate transport costs
+- Useful travel tips
 
-🌇 Evening
+💰 BUDGET BREAKDOWN
 
-🌙 Night
+Give an approximate breakdown for:
+- Accommodation
+- Transportation
+- Food
+- Activities
+- Shopping
+- Miscellaneous
 
-🍽️ Food to Try
+Use this table:
 
-🚕 Transport
+| Category | Estimated Cost |
 
-💵 Estimated Cost
+🏨 RECOMMENDED HOTELS
 
+Use this table:
 
-Repeat until Day ${days}.
+| Hotel | Category | Approximate Price | Rating |
 
+📍 ATTRACTIONS
 
-Finally include:
+Include:
+- Famous attractions
+- Nature spots
+- Photo spots
+- Local experiences
 
+💎 HIDDEN GEMS
 
-# 🏨 Best Hotels
+Suggest some lesser-known experiences or places.
 
-- Hotel Name
-- Approximate Price
-- Rating
+🎒 PACKING CHECKLIST
 
+Create a useful checklist according to:
+- Destination
+- Weather
+- Travel style
+- Number of days
 
-# 🍴 Best Restaurants
+⚠️ TRAVEL TIPS
 
-Recommend 5 famous restaurants.
+Include useful practical tips.
 
+📱 EMERGENCY INFORMATION
 
-# 📍 Top 10 Attractions
+Include general emergency and safety information.
 
-
-# 💰 Budget Breakdown
-
-Accommodation:
-
-Food:
-
-Transport:
-
-Activities:
-
-Shopping:
-
-Miscellaneous:
-
-Total:
-
-
-# 🎒 Packing Checklist
-
-10-15 items.
-
-
-# ⚠️ Travel Tips
-
-At least 10 useful travel tips.
-
+IMPORTANT:
+- Return Markdown only.
+- Do NOT return JSON.
+- Make the itinerary easy to read.
+- Do not use code blocks.
 
 End with:
 
-✨ Have a wonderful trip!
-
+✨ Have a safe and memorable journey with Journey Jotter!
 `;
 
-
-
-
     const response = await axios.post(
-
       "https://openrouter.ai/api/v1/chat/completions",
-
       {
-
         model: "openai/gpt-4o-mini",
-
         messages: [
-
           {
             role: "user",
-            content: prompt
-          }
-
+            content: prompt,
+          },
         ],
-
-        temperature: 0.8
-
+        temperature: 0.8,
       },
-
-
       {
-
         headers: {
-
           "Content-Type": "application/json",
-
-          Authorization:
-          `Bearer ${process.env.OPENROUTER_API_KEY}`
-
-        }
-
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        },
       }
-
     );
-
-
-
 
     const trip =
-      response.data.choices?.[0]?.message?.content ||
-      "No itinerary generated.";
+      response.data?.choices?.[0]?.message?.content;
 
+    if (!trip) {
+      throw new Error("No itinerary received from OpenRouter");
+    }
 
+    console.log("✅ Trip generated successfully");
 
     res.json({
-
       success: true,
-
-      trip
-
+      trip,
     });
-
-
-
-  } catch(error) {
-
-
+  } catch (error) {
     console.error(
-      "========== OPENROUTER ERROR =========="
+      "OPENROUTER ERROR:",
+      error.response?.data || error.message
     );
 
-
-    if(error.response){
-
-      console.log(error.response.data);
-
-    }
-
-    else{
-
-      console.log(error.message);
-
-    }
-
-
-
     res.status(500).json({
-
-      success:false,
-
-      message:"Failed to generate itinerary."
-
+      success: false,
+      message:
+        error.response?.data?.error?.message ||
+        error.message ||
+        "AI generation failed",
     });
-
-
   }
-
-
 });
 
-
-
-
+// =====================================================
+// SERVER
+// =====================================================
 
 app.listen(PORT, () => {
-
-  console.log(
-    `🚀 Server running on port ${PORT}`
-  );
-
+  console.log(`🚀 Backend running on port ${PORT}`);
 });
