@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import TripPlanner from "../../components/TripPlanner/TripPlanner";
+import TripPlanner from "../../components/TripPlannerComponent/TripPlanner";
 
 function Planner() {
   return (
