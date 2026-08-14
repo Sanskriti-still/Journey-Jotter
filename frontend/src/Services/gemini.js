@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/generate-trip";
+const API_URL = "https://journey-jotter-keab.onrender.com/generate-trip";
 
 export const generateTrip = async ({
   destination,

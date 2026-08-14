@@ -1,6 +1,6 @@
 export async function generateTrip(data) {
   const response = await fetch(
-    "http://localhost:5000/generate-trip",
+    "https://journey-jotter-keab.onrender.com/generate-trip",
     {
       method: "POST",
       headers: {
